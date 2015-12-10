@@ -7,7 +7,7 @@
     * [What openwa affects](#what-openwa-affects)
     * [Setup requirements](#setup-requirements)
 3. [Usage](#usage)
-4. [Reference](#Reference)
+4. [Reference](#reference)
     * [Public Classes](#public-classes)
     * [Public Defines](#public-defines)
 
@@ -56,8 +56,9 @@ openwa::cli::add_site { 'somedomain.net':
     - [Class: openwa::database](#class-openwadatabase)
     - [Class: openwa::cli](#class-openwacli)
 - [**Public Defines**](#public-defines)
-    - [Define: openwa::cli::install](#define-openwacli-install)
-    - [Define: openwa::cli::add_site](#define-openwacli-add_site)
+    - [Define: openwa::site_settings](#define-openwasitesettings)
+    - [Define: openwa::cli::install](#define-openwacliinstall)
+    - [Define: openwa::cli::add_site](#define-openwacliadd_site)
 
 ### Public Classes
 
@@ -198,6 +199,87 @@ See https://github.com/padams/Open-Web-Analytics/wiki/Command-Line-Interface-%28
 This is the type of command you want to run with cli.php
 
 ### Public Defines
+
+#### Define `openwa::site_settings`
+
+Automate the site settings or profile for any existing site
+
+Simple Usage:
+
+```puppet
+ openwa::site_settings { 'somedomain.net':
+  settings_domain => 'http://www.somedomain.net/',
+  filter          => '.+',
+  rules           => [
+    '(/view1)(/[^/]+) -> \$1',
+    '(/view2)(/[^/]+) -> \$1'
+  ],
+  rules_escapes   => 2,
+ }
+```
+
+**Parameters within `openwa::site_settings`:**
+
+##### `database_name`
+ This is the name of your database, such as openwa
+
+##### `database_user`
+ This is the database user which would have access to the database
+
+##### `database_pass`
+ This is the password your user requires to access the database
+ This password is also used if the openwa::cli::install class is used
+
+##### `mysql_path`
+ This will determine where your mysql binary is located
+
+##### `settings_domain`
+ This will determine the domain you wish to update the profile for
+
+##### `p3p_policy`
+ P3P Compact Privacy Policy under Site Settings
+ This setting controls the P3P compact privacy policy that is returned to the
+ browser when OWA sets cookies
+
+##### `settings_alias`
+ Domain Aliases under Site Settings
+ This setting allows you to specify additional domain names that you want OWA
+ to treat as the same as the one you are using for this tracked website. For
+ example, if the domain of your website is "www.mydomain.com" you could add
+ an alias here for "mydomain.com". Aliases should be separated by comma.
+
+##### `filter`
+ URL Parameters under Site Settings
+ This setting controls the URL parameters that OWA should ignore when
+ processing requests. This is useful for avoiding duplicate URLs due to the
+ use of tracking or others state parameters in your URLs. Parameter names
+ should be separated by comma.
+
+##### `rules`
+ Rewrite Rules under Site Settings
+ **NOTE** This setting may not be available with your installation as you may have
+ to pull in a fork of Open Web Analytics
+ **NOTE** If this value is not present update the settings variable to the
+ commented variable
+ This setting controls how to rewrite URLs. Rules should be separated by comma
+ Each rule looks like: (/view)(/[^/]+) -> $1
+
+##### `rules_escapes`
+ This may be a temporary parameter. Currently the variable that determines
+ the characters for the serialized database content doesn't exclude the
+ necessary "\" characters so that your $1 and $2 show up. See example
+ Currently you just have to count up how many times you use \ and set it
+
+##### `page`
+ Default Page under Site Settings
+ This is the page that your web server defaults to when there is no page
+ specified in your URL (e.g. index.html). Use this setting to combine page
+ views for www.domain.com and www.domain.com/index.html.
+
+##### `enabledecommerce`
+ e-commerce Reporting under Site Settings
+ Adds e-commerce metrics/statistics to reports. This value will be either
+ 0 for disabled or 1 for enabled
 
 #### Define `openwa::cli::install`
 
