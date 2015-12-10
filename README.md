@@ -56,7 +56,7 @@ openwa::cli::add_site { 'somedomain.net':
     - [Class: openwa::database](#class-openwadatabase)
     - [Class: openwa::cli](#class-openwacli)
 - [**Public Defines**](#public-defines)
-    - [Define: openwa::site_settings](#define-openwasitesettings)
+    - [Define: openwa::site_settings](#define-openwasite_settings)
     - [Define: openwa::cli::install](#define-openwacliinstall)
     - [Define: openwa::cli::add_site](#define-openwacliadd_site)
 
@@ -227,7 +227,7 @@ Simple Usage:
  This is the database user which would have access to the database
 
 ##### `database_pass`
- This is the password your user requires to access the database
+ This is the password your user requires to access the database.
  This password is also used if the openwa::cli::install class is used
 
 ##### `mysql_path`
@@ -258,17 +258,17 @@ Simple Usage:
 ##### `rules`
  Rewrite Rules under Site Settings
  **NOTE** This setting may not be available with your installation as you may have
- to pull in a fork of Open Web Analytics
+ to pull in a fork of Open Web Analytics.
  **NOTE** If this value is not present update the settings variable to the
- commented variable
- This setting controls how to rewrite URLs. Rules should be separated by comma
+ commented variable.
+ This setting controls how to rewrite URLs. Rules should be separated by comma.
  Each rule looks like: (/view)(/[^/]+) -> $1
 
 ##### `rules_escapes`
  This may be a temporary parameter. Currently the variable that determines
  the characters for the serialized database content doesn't exclude the
- necessary "\" characters so that your $1 and $2 show up. See example
- Currently you just have to count up how many times you use \ and set it
+ necessary "\" characters so that your $1 and $2 show up. See example.
+ Currently you just have to count up how many times you use \ and set it.
 
 ##### `page`
  Default Page under Site Settings
