@@ -214,7 +214,6 @@ Simple Usage:
     '(/view1)(/[^/]+) -> \$1',
     '(/view2)(/[^/]+) -> \$1'
   ],
-  rules_escapes   => 2,
  }
 ```
 
@@ -263,12 +262,6 @@ Simple Usage:
  commented variable.
  This setting controls how to rewrite URLs. Rules should be separated by comma.
  Each rule looks like: (/view)(/[^/]+) -> $1
-
-##### `rules_escapes`
- This may be a temporary parameter. Currently the variable that determines
- the characters for the serialized database content doesn't exclude the
- necessary "\" characters so that your $1 and $2 show up. See example.
- Currently you just have to count up how many times you use \ and set it.
 
 ##### `page`
  Default Page under Site Settings

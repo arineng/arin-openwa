@@ -50,12 +50,6 @@
 # This setting controls how to rewrite URLs. Rules should be separated by comma
 # Each rule looks like: (/view)(/[^/]+) -> $1
 #
-# * 'rules_escapes'
-# This may be a temporary parameter. Currently the variable that determines
-# the characters for the serialized database content doesn't exclude the
-# necessary "\" characters so that your $1 and $2 show up. See example
-# Currently you just have to count up how many times you use \ and set it
-#
 # * 'page'
 # Default Page under Site Settings
 # This is the page that your web server defaults to when there is no page
@@ -77,26 +71,24 @@
 # Sample Usage:
 #
 # openwa::site_settings { 'somedomain.net':
-#  settings_domain => 'http://www.somedomain.net/',
-#  filter          => '.+',
-#	 rules					 => [
-#	  '(/view1)(/[^/]+) -> \$1',
-#	 	'(/view2)(/[^/]+) -> \$1'
-#	 ],
-#  rules_escapes   => 2,
+#   settings_domain => 'http://www.somedomain.net/',
+#   filter          => '.+',
+#   rules					 => [
+#     '(/view1)(/[^/]+) -> \$1',
+#     '(/view2)(/[^/]+) -> \$1'
+#   ],
 # }
 
 define openwa::site_settings (
-	$database_user    = $openwa::params::database_user,
-	$database_pass    = $openwa::params::database_pass,
-	$database_name    = $openwa::params::database_name,
+  $database_user    = $openwa::params::database_user,
+  $database_pass    = $openwa::params::database_pass,
+  $database_name    = $openwa::params::database_name,
   $mysql_path       = '/usr/bin/',
-	$settings_domain  = "http://somedomain.net/",
-	$p3p_policy       = '',
+  $settings_domain  = "http://somedomain.net/",
+  $p3p_policy       = '',
   $settings_alias   = '',
   $filter           = '',
   $rules            = '',
-  $rules_escapes    = '0',
   $page             = '',
   $enableecommerce  = '0',
 ) {
@@ -105,22 +97,23 @@ define openwa::site_settings (
 
   # Variable construction done here
 
-	# rules_joined is to accommodate an array for the $rules parameter
+  # rules_joined is to accommodate an array for the $rules parameter
   $rules_joined    = join($rules,", ")
   $p3p_policy_size = size($p3p_policy)
   $alias_size      = size($settings_alias)
   $filter_size     = size($filter)
-  $rules_size      = ( size($rules_joined) - $rules_escapes )
+  $rules_size      = size(regsubst($rules_joined, '\\\\\$', '$', 'G'))
   $page_size       = size($page)
   $settings        = "a:6:{s:10:\\\"p3p_policy\\\";s:${p3p_policy_size}:\\\"${p3p_policy}\\\";s:14:\\\"domain_aliases\\\";s:${alias_size}:\\\"${settings_alias}\\\";s:20:\\\"query_string_filters\\\";s:${filter_size}:\\\"${filter}\\\";s:13:\\\"rewrite_rules\\\";s:${rules_size}:\\\"${rules_joined}\\\";s:12:\\\"default_page\\\";s:${page_size}:\\\"${page}\\\";s:24:\\\"enableEcommerceReporting\\\";s:1:\\\"${enableecommerce}\\\";}"
 
-	# NOTE Use this variable for settings if you do not have the Rewrite Rules option in your Site Settings
+  # NOTE Use this variable for settings if you do not have the Rewrite Rules option in your Site Settings
   #$settings        = "a:6:{s:10:\\\"p3p_policy\\\";s:${p3p_policy_size}:\\\"${p3p_policy}\\\";s:14:\\\"domain_aliases\\\";s:${alias_size}:\\\"${settings_alias}\\\";s:20:\\\"query_string_filters\\\";s:${filter_size}:\\\"${filter}\\\";s:12:\\\"default_page\\\";s:${page_size}:\\\"${page}\\\";s:24:\\\"enableEcommerceReporting\\\";s:1:\\\"${enableecommerce}\\\";}"
 
   # Variable construction done
 
-  exec { '$title':
+  exec { "$title":
     path    => $mysql_path,
+    unless  => "mysql -u${database_user} -p${database_pass} -e \"SELECT domain FROM ${database_name}.owa_site WHERE settings LIKE '${settings}' ;\" | /bin/grep \"${settings_domain}\"",
     command => "mysql -u${database_user} -p${database_pass} -e \"UPDATE ${database_name}.owa_site SET settings='${settings}' WHERE domain='${settings_domain}'; \"",
   }
 }
