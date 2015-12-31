@@ -222,6 +222,9 @@ Simple Usage:
 ##### `database_name`
  This is the name of your database, such as openwa
 
+#### `database_host`
+ This is the host of your database, such as localhost
+
 ##### `database_user`
  This is the database user which would have access to the database
 

@@ -9,6 +9,9 @@
 # * 'database_name'
 # This is the name of your database, such as openwa
 #
+# * 'database_host'
+# This is the host of your database, such as localhost
+#
 # * 'database_user'
 # This is the database user which would have access to the database
 #
@@ -83,6 +86,7 @@ define openwa::site_settings (
   $database_user    = $openwa::params::database_user,
   $database_pass    = $openwa::params::database_pass,
   $database_name    = $openwa::params::database_name,
+  $database_host    = $openwa::params::database_host,
   $mysql_path       = '/usr/bin/',
   $settings_domain  = "http://somedomain.net/",
   $p3p_policy       = '',
@@ -113,8 +117,8 @@ define openwa::site_settings (
 
   exec { "$title":
     path    => $mysql_path,
-    unless  => "mysql -u${database_user} -p${database_pass} -e \"SELECT domain FROM ${database_name}.owa_site WHERE settings LIKE '${settings}' ;\" | /bin/grep \"${settings_domain}\"",
-    command => "mysql -u${database_user} -p${database_pass} -e \"UPDATE ${database_name}.owa_site SET settings='${settings}' WHERE domain='${settings_domain}'; \"",
+    unless  => "mysql -u${database_user} -p${database_pass} -h${database_host} -e \"SELECT domain FROM ${database_name}.owa_site WHERE settings LIKE '${settings}' ;\" | /bin/grep \"${settings_domain}\"",
+    command => "mysql -u${database_user} -p${database_pass} -h${database_host} -e \"UPDATE ${database_name}.owa_site SET settings='${settings}' WHERE domain='${settings_domain}'; \"",
   }
 }
 
