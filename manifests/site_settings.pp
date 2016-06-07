@@ -88,7 +88,7 @@ define openwa::site_settings (
   $database_name    = $openwa::params::database_name,
   $database_host    = $openwa::params::database_host,
   $mysql_path       = '/usr/bin/',
-  $settings_domain  = "http://somedomain.net/",
+  $settings_domain  = 'http://somedomain.net/',
   $p3p_policy       = '',
   $settings_alias   = '',
   $filter           = '',
@@ -102,7 +102,7 @@ define openwa::site_settings (
   # Variable construction done here
 
   # rules_joined is to accommodate an array for the $rules parameter
-  $rules_joined    = join($rules,", ")
+  $rules_joined    = join($rules,', ')
   $p3p_policy_size = size($p3p_policy)
   $alias_size      = size($settings_alias)
   $filter_size     = size($filter)
@@ -115,7 +115,7 @@ define openwa::site_settings (
 
   # Variable construction done
 
-  exec { "$title":
+  exec { $title:
     path    => $mysql_path,
     unless  => "mysql -u${database_user} -p${database_pass} -h${database_host} -e \"SELECT domain FROM ${database_name}.owa_site WHERE settings LIKE '${settings}' ;\" | /bin/grep \"${settings_domain}\"",
     command => "mysql -u${database_user} -p${database_pass} -h${database_host} -e \"UPDATE ${database_name}.owa_site SET settings='${settings}' WHERE domain='${settings_domain}'; \"",
