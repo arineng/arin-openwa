@@ -1,5 +1,8 @@
 require 'puppetlabs_spec_helper/rake_tasks'
 require 'puppet-lint/tasks/puppet-lint'
+require 'rubygems'
+require 'git'
+
 PuppetLint.configuration.send('disable_80chars')
 PuppetLint.configuration.ignore_paths = ["spec/**/*.pp", "pkg/**/*.pp"]
 
@@ -25,17 +28,36 @@ namespace :puppet_git_hooks do
       puts "Please enter the hook path [#{Dir.pwd}]"
       hook_path = $stdin.gets.strip
       if hook_path.to_s.empty?
-        hook_clone = '.puppet-git-hooks'
+        hook_clone = Dir.pwd
       else
-        hook_clone = "#{hook_path}/.puppet-git-hooks"
+        hook_clone = hook_path
       end
-      if File.directory?("#{hook_path}/.puppet-git-hooks")
-        puts "Hooks already in path at #{hook_clone}. Linking"
-        system("#{hook_clone}/deploy-git-hook -d . -c")
+      if File.directory?("#{hook_clone}/.puppet-git-hooks")
+        puts "Hooks already in path at #{hook_clone}. Linking."
+        system("#{hook_clone}/.puppet-git-hooks/deploy-git-hook -d #{Dir.pwd} -c")
+        begin
+          check_hooks = File.readlink('.git/hooks/pre-commit')
+        rescue Exception => e
+          puts 'Failed to link git hooks'
+          puts e.message
+        end
       else
         puts "Hooks not found in #{hook_path}. Cloning"
-        system("git clone https://bitbucket.arin.net/scm/ghm/puppet-git-hooks.git #{hook_clone}")
-        system("#{hook_clone}/deploy-git-hook -d . -c")
+        begin
+          g = Git.clone('https://bitbucket.arin.net/scm/ghm/puppet-git-hooks.git', '.puppet-git-hooks', :path => hook_clone)
+        rescue Exception => e
+          puts ''
+          puts e.message
+          exit 1
+        end
+        puts "Successfully cloned puppet-git-hooks to #{hook_clone}"
+        system("#{hook_clone}/.puppet-git-hooks/deploy-git-hook -d #{Dir.pwd} -c")
+        begin
+          check_hooks = File.readlink('.git/hooks/pre-commit')
+        rescue Exception => e
+          puts 'Failed to link git hooks'
+          puts e.message
+        end
         puts "Done!"
       end
     else
@@ -46,9 +68,30 @@ namespace :puppet_git_hooks do
   desc "Update Puppet Git Hooks"
   task :update do
     puts 'Updating Puppet Git Hooks...'
-    working_dir = Dir.pwd
     repo_dir = File.dirname(File.readlink(".git/hooks/pre-commit"))
-    system("cd #{repo_dir} && git checkout master && git pull & cd #{working_dir}")
+    begin
+      g = Git.open(repo_dir)
+    rescue Exception => e
+      puts ''
+      puts e.message
+      exit 1
+    end
+    begin
+      checkout = g.checkout('master')
+    rescue Exception => e
+      puts 'Unable to checkout master branch'
+      puts e.message
+      exit 1
+    end
+    puts checkout
+    begin
+      pull = g.pull
+    rescue Exception => e
+      puts 'Can\'t pull down origin master'
+      puts e.message
+      exit 1
+    end
+    puts pull
     puts "Done!"
   end
 end
